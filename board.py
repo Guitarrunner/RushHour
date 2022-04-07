@@ -1,8 +1,9 @@
-path = "./problems/p17"
+path = "./problems/p"
 from cars import *
 
 class Board:
-    def __init__(self, rows=6, cols=6):
+    def __init__(self, problem, rows=6, cols=6):
+        self.problem = problem
         self.rows=rows
         self.cols= cols
         self.grid=[]
@@ -10,9 +11,9 @@ class Board:
         self.level = 0
         self.vehicles = {}
         self.stage = []
-        self.path = path
+        self.path = path+problem
 
-        with open(path,"r") as levelFile:
+        with open(self.path,"r") as levelFile:
             for line in levelFile:
                 block=[]
                 for letter in line:
@@ -21,8 +22,6 @@ class Board:
                     elif letter!='\n':
                         block.append(letter)
                 self.stage.append(block)
-
-         
 
     def gridSpace(self, size):
         for i in range(size):

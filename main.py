@@ -1,15 +1,14 @@
 from curses import KEY_DOWN
+from datetime import datetime
 from tkinter import RIGHT
 import pygame
 from pygame.locals import *
 from board import *
 import sys
 import time 
-from algorithm import *
+from astar import *
 
 pygame.init()
-
-
 
 width = 900
 height= 800
@@ -45,8 +44,8 @@ def mainMenu():
         
         pygame.draw.rect(screen, (255, 159, 28), exitButton)
         pygame.draw.rect(screen, (255, 159, 28), playButton)
-        screen.blit(textP,(425,165))
-        screen.blit(textQ,(425,265))
+        screen.blit(textP,(425,155))
+        screen.blit(textQ,(425,255))
                 
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -71,7 +70,7 @@ def setGame():
         selectLevel = pygame.Rect(200, 300, 200, 50)
         putLevel = pygame.Rect(600,300, 200, 200)
         playLevel = pygame.Rect(200,400,200,50)
-        playOwn = pygame.Rect(600,550,200,50)
+        playOwn = pygame.Rect(590,550,240,50)
 
         textL = font.render("Pick Level", True, (249,249,249))
         textO = font.render("Write your own", True, (249,249,249))
@@ -89,13 +88,13 @@ def setGame():
                     else:
                         level=''
                         error = font.render("Choose a level between 1 and 40", True, (255,0,0))
-                        screen.blit(error,(450,500))
+                        screen.blit(error,(250,500))
                         pygame.display.update()  
                         time.sleep(1)
                 except:
                     level=''
                     error = font.render("Choose a level between 1 and 40", True, (255,0,0))
-                    screen.blit(error,(450,500))
+                    screen.blit(error,(250,500))
                     pygame.display.update()  
                     time.sleep(1)
 
@@ -115,7 +114,7 @@ def setGame():
                 except:
                     ownLevel=''
                     error = font.render("Wrong composition", True, (255,0,0))
-                    screen.blit(error,(450,500))
+                    screen.blit(error,(350,500))
                     pygame.display.update()  
                     time.sleep(1)
 
@@ -124,8 +123,8 @@ def setGame():
         pygame.draw.rect(screen, (255, 255, 255), putLevel)
         pygame.draw.rect(screen, (255, 159, 28), playOwn)
         pygame.draw.rect(screen, (255, 159, 28), playLevel)
-        screen.blit(textO,(620,565))
-        screen.blit(textL,(250,415))
+        screen.blit(textO,(605,560))
+        screen.blit(textL,(230,405))
         screen.blit(levelText,(200,300))
         screen.blit(ownLevelText,(600,300))
         for event in pygame.event.get():
@@ -168,13 +167,25 @@ def game(problem):
     with open(filename) as rushhour_file:
         rushhour = load_file(rushhour_file)
 
-    results = breadth_first_search(rushhour, max_depth=100)
+    #
+    h4 = DistanceFromTargetToExit()
+    aStar = AStar(h4)
+    
+    start_time = datetime.now()
+    sol = aStar.aStar(rushhour)
+    end_time = datetime.now()
+    print('Duration: {}'.format(end_time - start_time))
+    #print(sol['Solution'],"\n steps", sol['Steps'],'\n ',sol['Expanded Nodes'])
+    for solutions in sol['Solution']:
+        print(solutions.lastmove)
+    #
+    #results = breadth_first_search(rushhour, max_depth=100)
 
-    print ('{0} Solutions found'.format(len(results['solutions'])))
-    for solution in results['solutions']:
-        print ('Solution: {0}'.format(', '.join(solution_steps(solution))))
+    #print ('{0} Solutions found'.format(len(results['solutions'])))
+    #for solution in results['solutions']:
+        #print ('Solution: {0}'.format(', '.join(solution_steps(solution))))
 
-    print ('{0} Nodes visited'.format(len(results['visited'])))
+    #print ('{0} Nodes visited'.format(len(results['visited'])))
 
 
     while playing:
@@ -221,10 +232,12 @@ def game(problem):
                     elif event.key == K_x:
                         car = "X"
                     elif event.key == K_8:
-                        for solution in results['solutions']:
-                            solution1=solution_steps(solution)
-                        for steps in solution1:
-                            car = steps[0]
+                        for solution in sol['Solution']:
+                            steps = solution.lastmove
+                            if len(steps)!=0:
+                                car = steps[0]
+                            else:
+                                steps="ZZ"
                             if steps[1]=="L" or steps[1]=="U":
                                 board.move(car, -1)
                                 screen.blit(bg_img, (0,0))

@@ -6,8 +6,11 @@ redCar = Cars('X', 4, 2, 'H', True)
 
 class RushHour(object):
 
-    def __init__(self, vehicles):
+    def __init__(self, vehicles, depth = 0, hvalue = 0):
         self.vehicles = vehicles
+        self.depth = depth
+        self.hvalue = hvalue
+        self.lastmove=""
 
     def __hash__(self):
         return hash(self.__repr__())
@@ -15,8 +18,22 @@ class RushHour(object):
     def __eq__(self, other):
         return self.vehicles == other.vehicles
 
+    def __cmp__(self, b):
+        if self.hvalue+self.depth==b.hvalue+b.depth:
+            return 0
+        else:
+            if self.depth + self.hvalue>b.depth+ b.hvalue:
+                return 1
+            return -1
+
+    def __lt__(self, other):
+            return self.depth + self.hvalue < other.depth + other.hvalue
+
+    def __gt__(self, other):
+        return self.depth + self.hvalue > other.depth + other.hvalue
+
     def __ne__(self, other):
-        return not self.__eq__(other)
+        return not self.__eq__(other)    
 
     def __repr__(self):
         s = '-' * 8 + '\n'
@@ -54,26 +71,44 @@ class RushHour(object):
                     new_vehicles = self.vehicles.copy()
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
-                    yield RushHour(new_vehicles)
+                    
+                    f1 = RushHour(new_vehicles)
+                    f1.lastmove=new_v.id+"L"
+                    yield f1
                 if v.x + v.length <= 5 and board[v.y][v.x + v.length] == ' ':
                     new_v = Cars(v.id, v.x + 1, v.y, v.orientation, True)
                     new_vehicles = self.vehicles.copy()
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
-                    yield RushHour(new_vehicles)
+                    
+                    f1 = RushHour(new_vehicles)
+                    f1.lastmove=new_v.id+"R"
+                    yield f1
             else:
                 if v.y - 1 >= 0 and board[v.y - 1][v.x] == ' ':
                     new_v = Cars(v.id, v.x, v.y - 1, v.orientation, True)
                     new_vehicles = self.vehicles.copy()
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
-                    yield RushHour(new_vehicles)
+                    
+                    f1 = RushHour(new_vehicles)
+                    f1.lastmove=new_v.id+"U"
+                    yield f1
                 if v.y + v.length <= 5 and board[v.y + v.length][v.x] == ' ':
                     new_v = Cars(v.id, v.x, v.y + 1, v.orientation, True)
                     new_vehicles = self.vehicles.copy()
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
-                    yield RushHour(new_vehicles)
+                    
+                    f1 = RushHour(new_vehicles)
+                    f1.lastmove=new_v.id+"D"
+                    yield f1
+
+    def getTragetVehicle(self):
+        for v in self.vehicles:
+            if v.id =='X':
+                return v
+        return None
 
 def load_file(rushhour_file):
     vehicles = []
@@ -128,4 +163,3 @@ def solution_steps(solution):
         elif v1.y > v2.y:
             steps.append('{0}U'.format(v1.id))
     return steps
-

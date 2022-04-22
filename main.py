@@ -83,17 +83,18 @@ def setGame():
             if click:
                 click=False
                 try:
-                    if 0<int(level)<41:
+                    if 0<int(level)<47:
                         game(level)
                     else:
                         level=''
-                        error = font.render("Choose a level between 1 and 40", True, (255,0,0))
+                        error = font.render("Choose a level between 1 and 46", True, (255,0,0))
                         screen.blit(error,(250,500))
                         pygame.display.update()  
                         time.sleep(1)
-                except:
+                except Exception as e:
+                    print (e)
                     level=''
-                    error = font.render("Choose a level between 1 and 40", True, (255,0,0))
+                    error = font.render(e, True, (255,0,0))
                     screen.blit(error,(250,500))
                     pygame.display.update()  
                     time.sleep(1)
